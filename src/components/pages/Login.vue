@@ -46,11 +46,14 @@ export default {
   methods:{
     signin(){
       const vm = this;
-      const api = 'https://vue-course-api.hexschool.io/signin' 
+      const api = 'https://vue-course-api.hexschool.io/admin/signin' 
     this.$http.post(api,vm.user).then((response) => {
     console.log(response.data)
-    },
-
+    if(response.data.success){
+      vm.$router.push('/admin/products')  //登入成功進入首頁
+    }
+    })
+    }
   },
 };
 </script>
