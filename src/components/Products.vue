@@ -76,7 +76,8 @@
                     或 上傳圖片
                     <i class="fas fa-spinner fa-spin"></i>
                   </label>
-                  <input type="file" id="customFile" class="form-control" ref="files" />
+                  <!-- 上傳圖片 -->
+                  <input type="file" id="customFile" class="form-control" ref="files" @change="uploadFile"/>
                 </div>
                 <img
                   img="https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=828346ed697837ce808cae68d3ddc3cf&auto=format&fit=crop&w=1350&q=80"
@@ -282,9 +283,10 @@ export default {
       });
     },
     openDelModal(item) {
-      //編輯產品會這樣寫是因為將 items 的值寫到空物件裡面避免 this.tempProduct 與 items 有傳參考的特性
-      this.tempProduct = item; 
-      $("#delProductModal").modal("show");
+      //可以直接寫成這樣 this.tempProduct = item; 
+      //編輯產品將 items 的值寫到空物件是為了避免 this.tempProduct 與 items 有傳參考的特性
+      this.tempProduct = Object.assign({}, item);
+      $("#delProductModal").modal("show");    
     },
     deleteProduct() {
       const vm = this;
@@ -301,6 +303,31 @@ export default {
           console.log("刪除失敗");
         }
       });
+    },
+    uploadFile(){
+      console.log(this);   //可以觀察refs裡的files的files，裡面那層的files是一個陣列
+      const uploadedFile = this.$refs.files.files[0];
+      const vm =this;
+
+      //用formData模擬傳統的表單送出
+      const formData =  new FormData(); //建立formData物件
+      formData.append('file-to-upload', uploadedFile);  //新增一個欄位
+      const url = "https://vue-course-api.hexschool.io/api/noelle/admin/upload";
+      
+      //送到後端，物件就是FormData的格式
+      this.$http.post(url, formData, {
+        header:{'Content-Type':'multipart/form-data'}
+      }).then((response)=>{
+           console.log(response.data);  //檢查imageUrl路徑打開是不是我剛剛上傳的照片
+           if(response.data.success){
+            //  vm.tempProduct.imageUrl = response.data.imageUrl; 這樣無效
+
+             //tempProduct的imageUrl沒有雙向綁定，要強制把set寫入
+             vm.$set(vm.tempProduct,'imageUrl', response.data.imageUrl)
+           }
+      });
+
+
     }
   },
   //一定要有created不然getProducts不會被觸發
