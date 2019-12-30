@@ -2,7 +2,7 @@
   <div>
     <div class="text-right mt-4">
       <!-- 把原本的Modal寫法改成用method呼叫開啟 -->
-      <button class="btn btn-primary" @click="openModal">建立新的產品</button>
+      <button class="btn btn-primary" @click="openModal(true)">建立新的產品</button>
     </div>
     <table class="table mt-4">
       <thead>
@@ -13,6 +13,7 @@
           <th width="120">售價</th>
           <th width="80">是否啟用</th>
           <th width="80">編輯</th>
+          <th width="80">刪除</th>
         </tr>
       </thead>
       <tbody>
@@ -29,13 +30,16 @@
             <span>未啟用</span>
           </td>
           <td>
-            <button class="btn btn-outline-primary btn-sm">編輯</button>
+            <button class="btn btn-outline-primary btn-sm" @click="openModal(false,item)">編輯</button>
+          </td>
+          <td>
+            <button class="btn btn-outline-danger btn-sm" @click="openDelModal(item)">刪除</button>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <!-- Modal -->
+    <!-- 新增或編輯的Modal -->
     <div
       class="modal fade"
       id="productModal"
@@ -168,7 +172,7 @@
                       v-model="is_enabled"
                       :true-value="1"
                       :false-value="0"
-                       id="is_enabled"
+                      id="is_enabled"
                     />
                     <label class="form-check-label" for="is_enabled">是否啟用</label>
                   </div>
@@ -183,6 +187,7 @@
         </div>
       </div>
     </div>
+    <!-- 刪除的Modal -->
     <div
       class="modal fade"
       id="delProductModal"
@@ -208,7 +213,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">取消</button>
-            <button type="button" class="btn btn-danger">確認刪除</button>
+            <button type="button" class="btn btn-danger" @click="deleteProduct">確認刪除</button>
           </div>
         </div>
       </div>
@@ -225,36 +230,76 @@ export default {
   data() {
     return {
       products: [],
-      tempProduct: {}  //用post把資料新增到資料庫
+      tempProduct: {}, 
+      isNew: false,
+      
+
     };
   },
   methods: {
     getProducts() {
-      const api = "https://vue-course-api.hexschool.io/api/noelle/admin/products";
+      const api =
+        "https://vue-course-api.hexschool.io/api/noelle/admin/products";
       const vm = this;
       this.$http.get(api).then(response => {
         console.log(response.data);
         vm.products = response.data.products;
       });
     },
-    openModal() {
+    openModal(isNew, item) {
+      if (isNew) {
+        this.tempProduct = {};
+        this.isNew = true; // 新增產品
+      } else {
+        //Object.assign是ES6寫法，把傳入的item放入物件，避免tempProduct跟item有參考的特性(shallow copy)
+        this.tempProduct = Object.assign({}, item);
+        this.isNew = false; // 修改產品
+      }
       $("#productModal").modal("show");
     },
-    updateProduct() {  
-      const api ="https://vue-course-api.hexschool.io/api/noelle/admin/products";
-       const vm = this;
-      //post行為把tempProduct傳回後端
-      this.$http.post(api,{ data:vm.tempProduct }).then((response) => {
+    updateProduct() {
+      let api = "https://vue-course-api.hexschool.io/api/noelle/admin/product";
+      let httpMethod = "post";
+      const vm = this;
+
+      if (!vm.isNew) {
+        // 如果有用$符號，就要改成``
+        api = `https://vue-course-api.hexschool.io/api/noelle/admin/product/${vm.tempProduct.id}`;
+        httpMethod = "put";
+      }
+
+      //如果是新增，用post方法，如果是修改，就用put方法把tempProduct傳回後端
+      this.$http[httpMethod](api, { data: vm.tempProduct }).then(response => {
         console.log(response.data);
-        if(response.data.success){
-          $('#productModal').modal('hide');
+        if (response.data.success) {
+          $("#productModal").modal("hide");
           vm.getProducts();
-        }else{
-          $('#productModal').modal('hide');
+        } else {
+          $("#productModal").modal("hide");
           vm.getProducts();
-          console.log('新增失敗');
+          console.log("新增失敗");
         }
-        
+      });
+    },
+    openDelModal(item) {
+      //編輯產品會這樣寫是因為將 items 的值寫到空物件裡面避免 this.tempProduct 與 items 有傳參考的特性
+      this.tempProduct = item; 
+      $("#delProductModal").modal("show");
+    },
+    deleteProduct() {
+      const vm = this;
+      let api = `https://vue-course-api.hexschool.io/api/noelle/admin/product/${vm.tempProduct.id}`;
+
+      this.$http.delete(api, { data: vm.tempProduct }).then(response => {
+        console.log(response.data);
+        if (response.data.success) {
+          $("#delProductModal").modal("hide");
+          vm.getProducts();
+        } else {
+          $("#delProductModal").modal("hide");
+          vm.getProducts();
+          console.log("刪除失敗");
+        }
       });
     }
   },
