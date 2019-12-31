@@ -1,5 +1,7 @@
 <template>
-  <div>
+  <div> 
+    <!-- 載入Loading的元件 -->
+     <loading :active.sync="isLoading"></loading>
     <div class="text-right mt-4">
       <!-- 把原本的Modal寫法改成用method呼叫開啟 -->
       <button class="btn btn-primary" @click="openModal(true)">建立新的產品</button>
@@ -74,7 +76,7 @@
                 <div class="form-group">
                   <label for="customFile">
                     或 上傳圖片
-                    <i class="fas fa-spinner fa-spin"></i>
+                    <i class="fas fa-spinner fa-spin" v-if="status.fileUploading"></i>
                   </label>
                   <!-- 上傳圖片 -->
                   <input type="file" id="customFile" class="form-control" ref="files" @change="uploadFile"/>
@@ -224,8 +226,10 @@
 
 
 <script>
+
 //瀏覽器不認得jquery的符號
 import $ from "jquery";
+
 
 export default {
   data() {
@@ -233,8 +237,10 @@ export default {
       products: [],
       tempProduct: {}, 
       isNew: false,
-      
-
+      isLoading: false,
+      status:{
+        fileUploading:false,
+      },
     };
   },
   methods: {
@@ -242,8 +248,10 @@ export default {
       const api =
         "https://vue-course-api.hexschool.io/api/noelle/admin/products";
       const vm = this;
+      vm.isLoading = true;
       this.$http.get(api).then(response => {
         console.log(response.data);
+        vm.isLoading = false;
         vm.products = response.data.products;
       });
     },
@@ -313,17 +321,19 @@ export default {
       const formData =  new FormData(); //建立formData物件
       formData.append('file-to-upload', uploadedFile);  //新增一個欄位
       const url = "https://vue-course-api.hexschool.io/api/noelle/admin/upload";
+      vm.status.fileUploading = true;
       
       //送到後端，物件就是FormData的格式
       this.$http.post(url, formData, {
         header:{'Content-Type':'multipart/form-data'}
       }).then((response)=>{
            console.log(response.data);  //檢查imageUrl路徑打開是不是我剛剛上傳的照片
+            vm.status.fileUploading = false;
            if(response.data.success){
-            //  vm.tempProduct.imageUrl = response.data.imageUrl; 這樣無效
-
+            
+            //如果寫成vm.tempProduct.imageUrl = response.data.imageUrl; 這樣無效
              //tempProduct的imageUrl沒有雙向綁定，要強制把set寫入
-             vm.$set(vm.tempProduct,'imageUrl', response.data.imageUrl)
+             vm.$set(vm.tempProduct,'imageUrl', response.data.imageUrl)        
            }
       });
 
