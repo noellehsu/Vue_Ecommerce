@@ -16,7 +16,7 @@
         type="password"
         id="inputPassword"
         class="form-control"
-        placeholder="Password"     v-model="user.password"
+        placeholder="Password"  v-model="user.password"
         required
       />
       <div class="checkbox mb-3">

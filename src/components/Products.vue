@@ -1,7 +1,7 @@
 <template>
-  <div> 
+  <div>
     <!-- 載入Loading的元件 -->
-     <loading :active.sync="isLoading"></loading>
+    <loading :active.sync="isLoading"></loading>
     <div class="text-right mt-4">
       <!-- 把原本的Modal寫法改成用method呼叫開啟 -->
       <button class="btn btn-primary" @click="openModal(true)">建立新的產品</button>
@@ -41,6 +41,28 @@
       </tbody>
     </table>
 
+    <!-- Pagination -->
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item" :class="{'disabled':!pagination.has_pre}">
+          <a class="page-link" href="#" aria-label="Previous" 
+          @click.prevent="getProducts(pagination.current_page-1)">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        <li class="page-item" v-for="page in pagination.total_pages" :key="page" :class="{'active':pagination.current_page===page}">
+          <a class="page-link" href="#" @click.prevent="getProducts(page)">{{page}}</a>
+        </li>
+       
+        <li class="page-item" :class="{'disabled':!pagination.has_next}">
+          <a class="page-link" href="#" aria-label="Next"
+           @click.prevent="getProducts(pagination.current_page+1)">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
     <!-- 新增或編輯的Modal -->
     <div
       class="modal fade"
@@ -79,7 +101,13 @@
                     <i class="fas fa-spinner fa-spin" v-if="status.fileUploading"></i>
                   </label>
                   <!-- 上傳圖片 -->
-                  <input type="file" id="customFile" class="form-control" ref="files" @change="uploadFile"/>
+                  <input
+                    type="file"
+                    id="customFile"
+                    class="form-control"
+                    ref="files"
+                    @change="uploadFile"
+                  />
                 </div>
                 <img
                   img="https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=828346ed697837ce808cae68d3ddc3cf&auto=format&fit=crop&w=1350&q=80"
@@ -226,33 +254,33 @@
 
 
 <script>
-
 //瀏覽器不認得jquery的符號
 import $ from "jquery";
-
 
 export default {
   data() {
     return {
       products: [],
-      tempProduct: {}, 
+      pagination: {},
+      tempProduct: {},
       isNew: false,
       isLoading: false,
-      status:{
-        fileUploading:false,
-      },
+      status: {
+        fileUploading: false
+      }
     };
   },
   methods: {
-    getProducts() {
+    getProducts(page=1) {   //參數預設值為1
       const api =
-        "https://vue-course-api.hexschool.io/api/noelle/admin/products";
+        `https://vue-course-api.hexschool.io/api/noelle/admin/products?page=${page}`;
       const vm = this;
       vm.isLoading = true;
       this.$http.get(api).then(response => {
         console.log(response.data);
         vm.isLoading = false;
         vm.products = response.data.products;
+        vm.pagination = response.data.pagination;
       });
     },
     openModal(isNew, item) {
@@ -291,10 +319,10 @@ export default {
       });
     },
     openDelModal(item) {
-      //可以直接寫成這樣 this.tempProduct = item; 
+      //可以直接寫成這樣 this.tempProduct = item;
       //編輯產品將 items 的值寫到空物件是為了避免 this.tempProduct 與 items 有傳參考的特性
       this.tempProduct = Object.assign({}, item);
-      $("#delProductModal").modal("show");    
+      $("#delProductModal").modal("show");
     },
     deleteProduct() {
       const vm = this;
@@ -312,32 +340,31 @@ export default {
         }
       });
     },
-    uploadFile(){
-      console.log(this);   //可以觀察refs裡的files的files，裡面那層的files是一個陣列
+    uploadFile() {
+      console.log(this); //可以觀察refs裡的files的files，裡面那層的files是一個陣列
       const uploadedFile = this.$refs.files.files[0];
-      const vm =this;
+      const vm = this;
 
       //用formData模擬傳統的表單送出
-      const formData =  new FormData(); //建立formData物件
-      formData.append('file-to-upload', uploadedFile);  //新增一個欄位
+      const formData = new FormData(); //建立formData物件
+      formData.append("file-to-upload", uploadedFile); //新增一個欄位
       const url = "https://vue-course-api.hexschool.io/api/noelle/admin/upload";
       vm.status.fileUploading = true;
-      
+
       //送到後端，物件就是FormData的格式
-      this.$http.post(url, formData, {
-        header:{'Content-Type':'multipart/form-data'}
-      }).then((response)=>{
-           console.log(response.data);  //檢查imageUrl路徑打開是不是我剛剛上傳的照片
-            vm.status.fileUploading = false;
-           if(response.data.success){
-            
+      this.$http
+        .post(url, formData, {
+          header: { "Content-Type": "multipart/form-data" }
+        })
+        .then(response => {
+          console.log(response.data); //檢查imageUrl路徑打開是不是我剛剛上傳的照片
+          vm.status.fileUploading = false;
+          if (response.data.success) {
             //如果寫成vm.tempProduct.imageUrl = response.data.imageUrl; 這樣無效
-             //tempProduct的imageUrl沒有雙向綁定，要強制把set寫入
-             vm.$set(vm.tempProduct,'imageUrl', response.data.imageUrl)        
-           }
-      });
-
-
+            //tempProduct的imageUrl沒有雙向綁定，要強制把set寫入
+            vm.$set(vm.tempProduct, "imageUrl", response.data.imageUrl);
+          }
+        });
     }
   },
   //一定要有created不然getProducts不會被觸發

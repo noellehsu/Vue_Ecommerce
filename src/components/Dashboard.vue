@@ -1,6 +1,7 @@
 <template>
     <div>
       <Navbar/>
+     
     <div class="container-fluid">
       <div class="row">
        <Sidebar></Sidebar>
@@ -18,11 +19,11 @@
 import Sidebar from './Sidebar';
 import Navbar from './Navbar'
 
+
 export default {
   components:{
     Sidebar,
-    Navbar,
-
+    Navbar
   }
 }
 </script>
