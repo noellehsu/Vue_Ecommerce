@@ -27,9 +27,9 @@
             <button
               type="button"
               class="btn btn-outline-secondary btn-sm"
-              @click="getSingleProduct(item.id)">
-              <i class="fas fa-spinner fa-spin"
-              v-if="status.loadingItem === item.id"></i> 
+              @click="getSingleProduct(item.id)"
+            >
+              <i class="fas fa-spinner fa-spin" v-if="status.loadingItem === item.id"></i>
               查看更多
             </button>
             <button type="button" class="btn btn-outline-danger btn-sm ml-auto">
@@ -40,20 +40,70 @@
         </div>
       </div>
     </div>
+
+    <!-- productModal -->
+    <div
+      class="modal fade"
+      id="productModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{ singleProduct.title }}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" style=" align:center">
+            <img :src="singleProduct.imageUrl" style="width:470px" />
+            <h6>{{ singleProduct.description }}</h6>
+            <br />
+            <div class="d-flex justify-content-between align-items-baseline">
+              <!-- 如果只有原價就顯示這個 -->
+              <del class="h5" v-if="!singleProduct.price">{{singleProduct.origin_price}}元</del>
+              <!-- 如果原價跟優惠價都有就顯示這個 -->
+              <del class="h6" v-if="singleProduct.price">原價{{singleProduct.origin_price}}元</del>
+              <h5 v-if="singleProduct.price">現在只要{{singleProduct.price}}元</h5>
+            </div>
+            <br />
+
+            <div class="container">
+            <div class="row">
+                <label for="exampleFormControlSelect1" style="width:440px" >選購數量</label>
+                <select class="form-control" id="exampleFormControlSelect1">
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                </select>
+            </div>
+          </div>
+</div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary">加到購物車</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import $ from "jquery";
 
-
 export default {
   data() {
     return {
       products: [],
-      singleProduct:{},
-      status:{
-          loadingItem:'',
+      singleProduct: {},
+      status: {
+        loadingItem: ""
       },
       isLoading: false
     };
@@ -75,10 +125,10 @@ export default {
       const vm = this;
       vm.status.loadingItem = id;
       this.$http.get(api).then(response => {
-      vm.singleProduct = response.data.product;
-      $('#productModal').modal('show');
-      console.log(response);
-      vm.status.loadingItem = '';
+        vm.singleProduct = response.data.product;
+        $("#productModal").modal("show");
+        console.log(response);
+        vm.status.loadingItem = "";
       });
     }
   },

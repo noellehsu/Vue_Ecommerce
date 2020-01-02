@@ -35,7 +35,7 @@
         <h6
           class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted"
         >
-          <span>不需要登入</span>
+          <span>前台</span>
           <a class="d-flex align-items-center text-muted" href="#">
             <span data-feather="plus-circle"></span>
           </a>
@@ -44,7 +44,7 @@
           <li class="nav-item">
             <a class="nav-link" href="#">
               <span data-feather="file-text"></span>
-                <router-link to="/customer_order" class="nav-item">模擬客戶購物 </router-link>
+                <router-link to="/customer_order" class="nav-item">開始購物 </router-link>
             </a>
           </li>               
         </ul>
