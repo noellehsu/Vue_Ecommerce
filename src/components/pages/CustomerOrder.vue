@@ -77,7 +77,7 @@
 
             <div class="container">
               <div class="row">
-                <select v-model="singleProduct.num">
+                <select v-model="singleProduct.num" class="form-control">
                   <option :value="num" v-for="num in 10" :key="num">選購{{num}} {{singleProduct.unit}}</option>
                 </select>
               </div>
@@ -87,7 +87,7 @@
           <div class="modal-footer">
             <div class="text-muted text-nowrap mr-3">
               小計
-              <strong>{{singleProduct.num * singleProduct*price}}</strong>
+              <strong>{{singleProduct.num * singleProduct.price}}</strong>
             </div>
             <button
               type="button"
@@ -118,14 +118,14 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in products" :key="item.id">
+        <tr v-for="item in cartProducts" :key="item.id">
           <td class="align-middle text-center"></td>
           <td>
             <img src="img/側背包/Tone Oilnume 兩用托特包.jpg" style="width: 150px;" class="img-thumbnail" />
           </td>
-          <td class="align-middle text-center">Tone Oilnume 兩用托特包</td>
-          <td class="align-middle">1件</td>
-          <td class="align-middle">$10020</td>
+          <td class="align-middle text-center">{{item.title}}</td>
+          <td class="align-middle">{{item.num}}</td>
+          <td class="align-middle">{{item.price}}</td>
         </tr>
       
       </tbody>
@@ -145,11 +145,12 @@ export default {
   data() {
     return {
       products: [],
-      singleProduct: {},
+      singleProduct: {},  
+      cartProducts:[],   
       status: {
         loadingItem: ""
       },
-      isLoading: false
+      isLoading: false    
     };
   },
   methods: {
@@ -198,6 +199,7 @@ export default {
       this.$http.get(api).then(response => {
         console.log(response.data);
         vm.isLoading = false;
+        vm.cartProducts = response.data.carts;
       });
     }
   },

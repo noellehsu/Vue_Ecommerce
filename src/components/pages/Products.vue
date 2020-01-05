@@ -22,7 +22,7 @@
         <!-- ESLint底下，v-for一定要綁定:key -->
         <!-- ESLint底下，當key還沒用到會報錯，這邊先刪掉 -->
         <!-- <tr v-for="(item, key) in products" :key="item.id"> -->
-        <tr v-for="(item) in products" :key="item.id">
+        <tr getCart>
           <td>{{item.category}}</td>
           <td>{{item.title}}</td>
           <td class="text-right">{{item.origin_price | currency}}</td>
