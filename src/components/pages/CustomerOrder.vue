@@ -100,7 +100,7 @@
           </div>
         </div>
       </div>
-    </div></br>
+    </div>
 
 <!-- 購物車 -->
     <div class="row">
@@ -110,7 +110,6 @@
     <table class="table table-sm mt-3">
       <thead>
         <tr>
-          <th width="30"></th>
           <th width="100"></th>
           <th class="text-center">商品名稱</th>
           <th width="80">數量</th>
@@ -119,15 +118,11 @@
       </thead>
       <tbody>
         <tr v-for="item in cartProducts" :key="item.id">
-          <td class="align-middle text-center"></td>
-          <td>
-            <img src="img/側背包/Tone Oilnume 兩用托特包.jpg" style="width: 150px;" class="img-thumbnail" />
-          </td>
+          <td class="align-middle text-center"></td>  
           <td class="align-middle text-center">{{item.title}}</td>
           <td class="align-middle">{{item.num}}</td>
           <td class="align-middle">{{item.price}}</td>
-        </tr>
-      
+        </tr>     
       </tbody>
     </table>
       </div>
